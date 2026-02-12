@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CR8F8 News</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #000;
+  --text: #e8e0d4;
+  --text-dim: #8a8278;
+  --text-bright: #fff;
+  --accent: #c9a96e;
+  --rule: #333;
+  --serif-display: 'Playfair Display', Georgia, serif;
+  --serif-body: 'Merriweather', Georgia, serif;
+  --serif-elegant: 'Cormorant Garamond', Georgia, serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--serif-body);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  padding-top: 36px;
+}
+
+a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--text-bright); }
+img { max-width: 100%; display: block; }
+
+hr { border: none; border-top: 1px solid var(--rule); margin: 0; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+/* ============================================================
+   MUSIC PLAYER BAR
+   ============================================================ */
+#music-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  height: 36px; background: rgba(10,10,10,0.92);
+  border-bottom: 1px solid #1a1a1a; cursor: pointer;
+  overflow: hidden; display: flex; align-items: center;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+
+#music-bar .ticker-wrap {
+  width: 100%; overflow: hidden; position: relative;
+  height: 36px; display: flex; align-items: center;
+}
+
+#music-bar .ticker-text {
+  display: inline-block; white-space: nowrap;
+  animation: musicScroll 22s linear infinite;
+  font-family: var(--serif-elegant); font-size: 14px;
+  color: var(--text-dim); letter-spacing: 0.5px; padding-left: 100%;
+}
+
+@keyframes musicScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+#music-bar .bar-icon {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 11px; color: var(--text-dim); pointer-events: none;
+  font-family: var(--serif-body); letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* Playlist dropdown */
+#playlist-panel {
+  position: fixed; top: 36px; left: 0; width: 340px; max-height: 420px;
+  background: rgba(10,10,10,0.96); border: 1px solid #222; border-top: none;
+  z-index: 999; display: none; overflow-y: auto;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+#playlist-panel.open { display: block; }
+
+#playlist-panel .pl-header {
+  padding: 14px 18px 10px; font-family: var(--serif-display);
+  font-size: 14px; font-weight: 700; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 2px;
+  border-bottom: 1px solid #1a1a1a;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.pl-under-construction {
+  font-family: var(--serif-elegant); font-size: 11px; font-weight: 400;
+  letter-spacing: 1px; color: var(--accent); text-transform: none;
+  animation: constructionPulse 2s ease-in-out infinite;
+}
+
+@keyframes constructionPulse {
+  0%, 100% { opacity: 0.4; } 50% { opacity: 1; }
+}
+
+.pl-construction-banner {
+  padding: 16px 18px; text-align: center; border-bottom: 1px solid #1a1a1a;
+}
+
+.construction-anim {
+  display: inline-block; font-size: 13px; font-family: var(--serif-elegant);
+  color: var(--accent); letter-spacing: 1px;
+}
+
+.construction-anim .crane {
+  display: inline-block; animation: craneSwing 3s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+@keyframes craneSwing {
+  0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); }
+}
+
+.construction-dots span { animation: dotBlink 1.4s infinite; opacity: 0; }
+.construction-dots span:nth-child(1) { animation-delay: 0s; }
+.construction-dots span:nth-child(2) { animation-delay: 0.2s; }
+.construction-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotBlink {
+  0%, 20% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; }
+}
+
+#playlist-panel .pl-item {
+  display: flex; align-items: center; padding: 10px 18px;
+  border-bottom: 1px solid #111; transition: background 0.2s;
+}
+#playlist-panel .pl-item:hover { background: rgba(255,255,255,0.03); }
+#playlist-panel .pl-item.now-playing { background: rgba(201,169,110,0.08); }
+
+#playlist-panel .pl-play {
+  width: 28px; height: 28px; border: 1px solid var(--text-dim);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; color: var(--text-dim); font-size: 11px;
+  transition: all 0.2s; background: transparent; margin-right: 12px;
+}
+#playlist-panel .pl-play:hover { border-color: var(--accent); color: var(--accent); }
+
+#playlist-panel .pl-info { flex: 1; min-width: 0; }
+
+#playlist-panel .pl-artist {
+  font-family: var(--serif-elegant); font-size: 14px; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+#playlist-panel .pl-song {
+  font-family: var(--serif-elegant); font-size: 13px; color: var(--text-dim);
+  font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+#playlist-panel .pl-remove {
+  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #555; font-size: 14px; flex-shrink: 0; margin-left: 8px;
+  transition: color 0.2s; background: transparent; border: none;
+}
+#playlist-panel .pl-remove:hover { color: #c44; }
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header-top { position: relative; padding-top: 18px; }
+
+.founder-link {
+  position: absolute; top: 18px; right: 0;
+  font-family: var(--serif-elegant); font-style: italic; font-size: 14px;
+  color: var(--text-dim); cursor: pointer; transition: color 0.2s;
+}
+.founder-link:hover { color: var(--accent); }
+
+#tagline {
+  text-align: center; font-family: var(--serif-elegant); font-size: 14px;
+  letter-spacing: 5px; text-transform: uppercase; color: var(--text-dim);
+  padding: 8px 0 16px; transition: opacity 0.3s;
+}
+
+.masthead { text-align: center; padding: 16px 0 20px; }
+
+.masthead-cr8f8 {
+  font-family: var(--serif-display); font-weight: 700;
+  font-size: clamp(52px, 9vw, 100px); color: var(--text-bright);
+  letter-spacing: 2px; line-height: 1;
+}
+
+.masthead-news {
+  font-family: var(--serif-display); font-weight: 400; font-style: italic;
+  font-size: clamp(32px, 5vw, 60px); color: var(--text);
+  vertical-align: baseline; margin-left: 8px; line-height: 1;
+}
+
+.meta-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--serif-elegant); font-size: 14px; color: var(--text-dim);
+  padding: 8px 0; letter-spacing: 1px;
+}
+.meta-bar .meta-left, .meta-bar .meta-right { text-transform: uppercase; }
+
+/* ============================================================
+   BREAKING NEWS BAR
+   ============================================================ */
+.breaking-bar {
+  display: flex; align-items: center;
+  background: linear-gradient(90deg, #f5f0e8, #e8e0d0);
+  margin: 18px 0; border-radius: 2px;
+  height: 48px; position: relative; overflow: visible;
+}
+
+.breaking-label {
+  color: #000; font-family: var(--serif-display); font-weight: 700;
+  font-size: 13px; letter-spacing: 1.5px; padding: 0 16px 0 18px;
+  flex-shrink: 0; white-space: nowrap; height: 100%;
+  display: flex; align-items: center; z-index: 2; position: relative;
+}
+
+.breaking-separator {
+  width: 1px; height: 22px; background: rgba(0,0,0,0.2);
+  flex-shrink: 0; margin-right: 4px;
+}
+
+.breaking-ticker-wrap {
+  flex: 1; overflow: hidden; height: 100%;
+  display: flex; align-items: center; position: relative;
+}
+
+/* Scrolling text ticker (hidden by default, shown when real news is set) */
+.breaking-ticker-text {
+  display: inline-block; white-space: nowrap;
+  animation: breakingScroll 35s linear infinite;
+  font-family: var(--serif-elegant); font-size: 15px; color: #222;
+  padding-left: 20px;
+}
+.breaking-ticker-text.hidden { display: none; }
+
+@keyframes breakingScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── ANIMATED SCENE: Under Construction Love Story ────────── */
+.breaking-scene {
+  width: 100%; height: 100%; position: relative; overflow: hidden;
+}
+
+.breaking-scene.hidden { display: none; }
+
+/* The stage where the smiley drama unfolds */
+.scene-stage {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center;
+}
+
+/* Individual characters */
+.scene-char {
+  position: absolute; font-size: 22px; top: 50%;
+  transform: translateY(-50%); transition: none;
+}
+
+/* Guy 1 - the smooth operator */
+#char-guy1 {
+  animation: guy1Action 20s ease-in-out infinite;
+  left: 15%;
+}
+
+@keyframes guy1Action {
+  0%      { left: -10%; opacity: 0; content: '😏'; }
+  5%      { left: 15%;  opacity: 1; }
+  10%     { left: 15%;  opacity: 1; } /* winking */
+  20%     { left: 15%;  opacity: 1; } /* blowing kiss */
+  55%     { left: 15%;  opacity: 1; } /* watching */
+  65%     { left: 15%;  opacity: 1; } /* turns to reader */
+  72%     { left: 15%;  opacity: 1; } /* winks at reader */
+  78%     { left: 15%;  opacity: 0; } /* fades for caution tape */
+  100%    { left: 15%;  opacity: 0; }
+}
+
+/* Guy 1 face changes via child spans */
+#char-guy1 .face-wink    { animation: guy1FaceWink 20s step-end infinite; }
+#char-guy1 .face-kiss     { animation: guy1FaceKiss 20s step-end infinite; }
+#char-guy1 .face-smirk    { animation: guy1FaceSmirk 20s step-end infinite; }
+
+@keyframes guy1FaceWink {
+  0%  { opacity: 0; } 5%  { opacity: 1; } 15% { opacity: 0; } 100% { opacity: 0; }
+}
+@keyframes guy1FaceKiss {
+  0%  { opacity: 0; } 15% { opacity: 1; } 30% { opacity: 0; } 100% { opacity: 0; }
+}
+@keyframes guy1FaceSmirk {
+  0%  { opacity: 0; } 30% { opacity: 0; } 55% { opacity: 1; } 78% { opacity: 1; } 78.1% { opacity: 0; } 100% { opacity: 0; }
+}
+
+/* The kiss projectile */
+#scene-kiss {
+  position: absolute; font-size: 16px; top: 50%;
+  transform: translateY(-50%);
+  animation: kissFloat 20s ease-in-out infinite;
+}
+
+@keyframes kissFloat {
+  0%   { left: 20%; opacity: 0; transform: translateY(-50%) scale(0.5); }
+  16%  { left: 20%; opacity: 0; transform: translateY(-50%) scale(0.5); }
+  18%  { left: 22%; opacity: 1; transform: translateY(-50%) scale(1); }
+  28%  { left: 43%; opacity: 1; transform: translateY(-60%) scale(1.2); }
+  32%  { left: 48%; opacity: 0; transform: translateY(-50%) scale(0.5); }
+  100% { left: 48%; opacity: 0; }
+}
+
+/* Girl */
+#char-girl {
+  animation: girlAction 20s ease-in-out infinite;
+  left: 48%;
+}
+
+@keyframes girlAction {
+  0%   { left: 48%; opacity: 0; }
+  22%  { left: 48%; opacity: 0; }
+  27%  { left: 48%; opacity: 1; } /* appears */
+  32%  { left: 48%; opacity: 1; } /* gets kissed, blushes */
+  42%  { left: 48%; opacity: 1; } /* boyfriend arrives */
+  52%  { left: 110%; opacity: 1; } /* exits with boyfriend */
+  55%  { left: 110%; opacity: 0; }
+  100% { left: 110%; opacity: 0; }
+}
+
+#char-girl .face-happy  { animation: girlFaceHappy 20s step-end infinite; }
+#char-girl .face-blush  { animation: girlFaceBlush 20s step-end infinite; }
+
+@keyframes girlFaceHappy {
+  0% { opacity: 0; } 27% { opacity: 1; } 31% { opacity: 0; } 100% { opacity: 0; }
+}
+@keyframes girlFaceBlush {
+  0% { opacity: 0; } 31% { opacity: 1; } 55% { opacity: 1; } 55.1% { opacity: 0; } 100% { opacity: 0; }
+}
+
+/* Boyfriend - the chad */
+#char-bf {
+  animation: bfAction 20s ease-in-out infinite;
+}
+
+@keyframes bfAction {
+  0%   { left: 110%; opacity: 0; }
+  35%  { left: 110%; opacity: 0; }
+  38%  { left: 110%; opacity: 1; }
+  42%  { left: 55%;  opacity: 1; } /* slides in next to girl */
+  52%  { left: 110%; opacity: 1; } /* exits with girl */
+  55%  { left: 120%; opacity: 0; }
+  100% { left: 120%; opacity: 0; }
+}
+
+/* Caution tape scroll */
+.caution-tape-wrap {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  overflow: hidden; display: flex; align-items: center;
+  animation: cautionAppear 20s step-end infinite;
+  opacity: 0;
+}
+
+@keyframes cautionAppear {
+  0%   { opacity: 0; }
+  76%  { opacity: 0; }
+  78%  { opacity: 1; }
+  98%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.caution-tape {
+  display: inline-block; white-space: nowrap;
+  animation: cautionScroll 6s linear infinite;
+  font-size: 13px; letter-spacing: 2px;
+  font-family: var(--serif-display); font-weight: 700;
+}
+
+@keyframes cautionScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.caution-tape .tape-segment {
+  display: inline-block; padding: 0 12px;
+}
+
+.caution-tape .tape-stripe {
+  display: inline-block; padding: 0 8px;
+  color: #000;
+  background: repeating-linear-gradient(
+    -45deg,
+    #f5c518,
+    #f5c518 8px,
+    #111 8px,
+    #111 16px
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.caution-tape .tape-emoji {
+  display: inline-block; padding: 0 6px;
+}
+
+/* Under construction text in breaking bar */
+.scene-uc-text {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--serif-elegant); font-size: 14px;
+  color: rgba(0,0,0,0.5); letter-spacing: 2px;
+  white-space: nowrap;
+  animation: ucTextAppear 20s step-end infinite;
+  opacity: 0;
+}
+
+@keyframes ucTextAppear {
+  0%   { opacity: 0; }
+  78%  { opacity: 0; }
+  80%  { opacity: 1; }
+  97%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ============================================================
+   EMOJI REACTIONS
+   ============================================================ */
+.breaking-react {
+  flex-shrink: 0; padding: 0; height: 100%;
+  display: flex; align-items: center; position: relative; z-index: 10;
+}
+
+.react-trigger-area {
+  display: flex; align-items: center; justify-content: center;
+  width: 48px; height: 100%; cursor: pointer; position: relative;
+}
+
+.react-trigger {
+  font-size: 18px; transition: transform 0.15s; user-select: none;
+}
+
+.react-trigger-area:hover .react-trigger { transform: scale(1.2); }
+
+/* The popup — attached to the trigger area with no gap */
+.emoji-popup {
+  display: none; position: absolute;
+  bottom: 100%; /* flush with top of trigger area */
+  right: 0;
+  background: rgba(15,15,15,0.97);
+  border: 1px solid #333; border-radius: 12px;
+  padding: 8px 10px 16px 10px; /* extra bottom padding = invisible bridge */
+  flex-direction: row; gap: 2px; z-index: 100;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+}
+
+.react-trigger-area:hover .emoji-popup {
+  display: flex;
+}
+
+.emoji-btn {
+  font-size: 22px; cursor: pointer; padding: 4px 5px;
+  border-radius: 8px; transition: all 0.15s;
+  background: transparent; border: none; position: relative; line-height: 1;
+}
+.emoji-btn:hover { background: rgba(255,255,255,0.1); transform: scale(1.35); }
+
+.emoji-btn .emoji-count {
+  position: absolute; top: -6px; right: -4px; font-size: 10px;
+  font-family: var(--serif-body); color: var(--accent); font-weight: 700;
+  min-width: 14px; text-align: center; display: none;
+}
+.emoji-btn .emoji-count.show { display: block; }
+
+.emoji-float {
+  position: fixed; font-size: 28px; pointer-events: none; z-index: 10000;
+  animation: emojiRise 1.2s ease-out forwards;
+}
+
+@keyframes emojiRise {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-90px) scale(1.5); }
+}
+
+/* ============================================================
+   TOGGLE BUTTONS
+   ============================================================ */
+.toggle-row { display: flex; justify-content: center; margin: 22px 0 28px; }
+
+.toggle-group {
+  display: flex; border: 1px solid #444; border-radius: 3px; overflow: hidden;
+}
+
+.toggle-btn {
+  font-family: var(--serif-display); font-weight: 700; font-size: 14px;
+  letter-spacing: 2px; text-transform: uppercase; padding: 12px 36px;
+  cursor: pointer; border: none; transition: all 0.25s;
+  background: var(--bg); color: var(--text);
+}
+.toggle-btn.active { background: var(--text-bright); color: #000; }
+.toggle-btn:not(.active):hover { background: #111; }
+
+/* ============================================================
+   SECTION HEADER
+   ============================================================ */
+.section-header { text-align: center; padding: 24px 0 4px; }
+
+.section-title {
+  font-family: var(--serif-display); font-weight: 900; font-size: 28px;
+  letter-spacing: 4px; text-transform: uppercase; color: var(--text-bright);
+}
+
+.section-subtitle {
+  font-family: var(--serif-elegant); font-style: italic; font-size: 16px;
+  color: var(--accent); margin-top: 4px;
+}
+
+/* ============================================================
+   ARTICLES
+   ============================================================ */
+.content-section { display: none; }
+.content-section.active { display: block; }
+.featured-article { padding: 30px 0; }
+
+.article-image {
+  width: 100%; height: 420px; background: #111;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; position: relative;
+}
+
+.article-image.ai-img {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1520 30%, #0d1117 60%, #0a0a0a 100%);
+}
+.article-image.ai-img::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(100,80,160,0.12) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(60,100,140,0.1) 0%, transparent 50%),
+    repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px),
+    repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px);
+}
+.article-image.ai-img::after {
+  content: '[ AI / TECHNOLOGY IMAGE PLACEHOLDER ]';
+  font-family: var(--serif-elegant); font-size: 14px; color: #444;
+  letter-spacing: 2px; z-index: 1;
+}
+
+.article-image.hope-img {
+  background: linear-gradient(135deg, #1a1510 0%, #15120d 50%, #0d0b08 100%);
+}
+.article-image.hope-img::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 40% 40%, rgba(180,150,100,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(140,120,80,0.06) 0%, transparent 50%);
+}
+.article-image.hope-img::after {
+  content: '[ HUMAN INTEREST IMAGE PLACEHOLDER ]';
+  font-family: var(--serif-elegant); font-size: 14px; color: #444;
+  letter-spacing: 2px; z-index: 1;
+}
+
+.article-credit {
+  font-family: var(--serif-elegant); font-style: italic; font-size: 13px;
+  color: var(--text-dim); margin-top: 6px;
+}
+
+.article-headline {
+  font-family: var(--serif-display); font-weight: 700;
+  font-size: clamp(24px, 4vw, 38px); color: var(--text-bright);
+  line-height: 1.25; margin-top: 14px;
+}
+
+.article-subtitle {
+  font-family: var(--serif-elegant); font-style: italic; font-size: 17px;
+  color: var(--accent); margin-top: 6px; line-height: 1.4;
+}
+
+.article-byline {
+  font-family: var(--serif-elegant); font-size: 13px; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 1.5px; margin-top: 12px;
+}
+.article-byline span { margin: 0 6px; }
+
+.article-excerpt {
+  font-family: var(--serif-body); font-size: 16px; line-height: 1.8;
+  color: var(--text); margin-top: 16px; text-align: justify;
+}
+.article-excerpt p { margin-bottom: 14px; }
+
+.article-continued {
+  font-family: var(--serif-elegant); font-style: italic; font-size: 14px;
+  color: var(--accent); margin-top: 8px; opacity: 0.7;
+}
+
+.article-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 10px 0 40px;
+}
+.article-grid .grid-article { padding: 24px; border-top: 1px solid var(--rule); }
+.article-grid .grid-article:nth-child(odd) { border-right: 1px solid var(--rule); }
+.grid-article .article-image { height: 0; display: none; }
+.grid-article .article-headline { font-size: clamp(18px, 2.5vw, 24px); }
+.grid-article .article-subtitle { font-size: 15px; }
+.grid-article .article-excerpt { font-size: 15px; line-height: 1.75; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+#site-footer { padding: 40px 0 30px; }
+
+.footer-links {
+  text-align: center; padding: 20px 0 30px;
+  font-family: var(--serif-elegant); font-size: 16px;
+}
+.footer-links a {
+  color: var(--accent); margin: 0 16px;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.footer-links a:hover { color: var(--text-bright); }
+
+.footer-quote {
+  text-align: center; padding: 20px 40px;
+  font-family: var(--serif-elegant); font-style: italic; font-size: 20px;
+  color: var(--text); line-height: 1.6; max-width: 700px; margin: 0 auto;
+}
+
+.footer-sign {
+  text-align: center; font-family: var(--serif-elegant); font-style: italic;
+  font-size: 15px; color: var(--text-dim); padding: 20px 0 6px;
+}
+
+.footer-glitch {
+  text-align: center; font-family: var(--serif-elegant); font-style: italic;
+  font-size: 15px; color: var(--text); padding-bottom: 24px;
+}
+
+.footer-copy {
+  text-align: center; font-family: var(--serif-elegant); font-size: 12px;
+  color: #555; letter-spacing: 2px; text-transform: uppercase; padding: 16px 0 0;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  body { padding-top: 32px; }
+  #music-bar { height: 32px; }
+  #music-bar .ticker-text { font-size: 12px; }
+  #playlist-panel { width: 100%; }
+  .container { padding: 0 16px; }
+  .founder-link { font-size: 11px; top: 12px; }
+  #tagline { font-size: 11px; letter-spacing: 3px; }
+  .meta-bar { font-size: 11px; flex-wrap: wrap; gap: 4px; justify-content: center; }
+  .meta-bar .meta-left, .meta-bar .meta-right { display: none; }
+  .toggle-btn { padding: 10px 22px; font-size: 12px; }
+  .article-image { height: 240px; }
+  .article-grid { grid-template-columns: 1fr; }
+  .article-grid .grid-article:nth-child(odd) { border-right: none; }
+  .footer-links a { display: block; margin: 8px 0; }
+  .footer-quote { font-size: 17px; padding: 16px 20px; }
+  .emoji-popup { right: -10px; }
+  .breaking-bar { height: 44px; }
+  .breaking-label { font-size: 11px; padding: 0 10px; }
+  .scene-char { font-size: 18px; }
+}
+
+.fade-in { animation: fadeIn 0.4s ease; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<!-- MUSIC PLAYER BAR -->
+<div id="music-bar" onclick="togglePlaylist()">
+  <div class="ticker-wrap">
+    <span class="ticker-text" id="music-ticker"></span>
+  </div>
+  <span class="bar-icon">&#9654; playlist</span>
+</div>
+
+<div id="playlist-panel">
+  <div class="pl-header">
+    <span>Playlist</span>
+    <span class="pl-under-construction">&#128679; under construction</span>
+  </div>
+  <div class="pl-construction-banner">
+    <div class="construction-anim">
+      <span class="crane">&#128679;</span>
+      &nbsp;Full playlist coming soon<span class="construction-dots"><span>.</span><span>.</span><span>.</span></span>
+    </div>
+  </div>
+  <div id="playlist-list"></div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+
+  <div class="header-top">
+    <a class="founder-link" onclick="document.getElementById('site-footer').scrollIntoView({behavior:'smooth'})">* Founder &amp; Token Address below</a>
+    <div id="tagline">"All The News That's Fit To Compute"</div>
+    <hr>
+  </div>
+
+  <div class="masthead">
+    <span class="masthead-cr8f8">CR8F8</span><span class="masthead-news"> News</span>
+  </div>
+
+  <div class="meta-bar">
+    <span class="meta-left">VOL. CXXXI... NO. 45,241</span>
+    <span class="meta-center" id="current-date"></span>
+    <span class="meta-right">LATE EDITION</span>
+  </div>
+
+  <hr>
+
+  <!-- BREAKING NEWS -->
+  <div class="breaking-bar">
+    <span class="breaking-label">Breaking News!</span>
+    <div class="breaking-separator"></div>
+    <div class="breaking-ticker-wrap">
+      <!-- Scrolling text (for real news — hidden during under construction) -->
+      <span class="breaking-ticker-text hidden" id="breaking-text"></span>
+
+      <!-- Animated Scene: Under Construction Love Story -->
+      <div class="breaking-scene" id="breaking-scene">
+        <div class="scene-stage">
+          <!-- Guy 1: The smooth operator -->
+          <div class="scene-char" id="char-guy1">
+            <span class="face-wink" style="position:absolute;inset:0;">😉</span>
+            <span class="face-kiss" style="position:absolute;inset:0;">😘</span>
+            <span class="face-smirk" style="position:absolute;inset:0;">😏</span>
+          </div>
+
+          <!-- The flying kiss -->
+          <div id="scene-kiss">💋</div>
+
+          <!-- Girl -->
+          <div class="scene-char" id="char-girl">
+            <span class="face-happy" style="position:absolute;inset:0;">😊</span>
+            <span class="face-blush" style="position:absolute;inset:0;">😳</span>
+          </div>
+
+          <!-- Boyfriend -->
+          <div class="scene-char" id="char-bf">😎</div>
+        </div>
+
+        <!-- Caution tape overlay (appears in second half of loop) -->
+        <div class="caution-tape-wrap">
+          <div class="caution-tape" id="caution-tape"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Emoji Reactions -->
+    <div class="breaking-react">
+      <div class="react-trigger-area">
+        <span class="react-trigger">&#128172;</span>
+        <div class="emoji-popup">
+          <button class="emoji-btn" onclick="reactEmoji('😢', event)" title="Crying">😢<span class="emoji-count" id="count-cry"></span></button>
+          <button class="emoji-btn" onclick="reactEmoji('😂', event)" title="Laughing">😂<span class="emoji-count" id="count-laugh"></span></button>
+          <button class="emoji-btn" onclick="reactEmoji('😊', event)" title="Smiling">😊<span class="emoji-count" id="count-smile"></span></button>
+          <button class="emoji-btn" onclick="reactEmoji('🍑', event)" title="Peach">🍑<span class="emoji-count" id="count-peach"></span></button>
+          <button class="emoji-btn" onclick="reactEmoji('🚀', event)" title="Rocket">🚀<span class="emoji-count" id="count-rocket"></span></button>
+          <button class="emoji-btn" onclick="reactEmoji('💰', event)" title="Moneybag">💰<span class="emoji-count" id="count-money"></span></button>
+          <button class="emoji-btn" onclick="reactEmoji('❤️', event)" title="Heart">❤️<span class="emoji-count" id="count-heart"></span></button>
+          <button class="emoji-btn" onclick="reactEmoji('💔', event)" title="Broken Heart">💔<span class="emoji-count" id="count-broken"></span></button>
+          <button class="emoji-btn" onclick="reactEmoji('🖤', event)" title="Black Heart">🖤<span class="emoji-count" id="count-black"></span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOGGLE -->
+  <div class="toggle-row">
+    <div class="toggle-group">
+      <button class="toggle-btn active" id="btn-ai" onclick="switchSection('ai')">AI NEWS</button>
+      <button class="toggle-btn" id="btn-hope" onclick="switchSection('hope')">HOPECORE</button>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- AI NEWS -->
+  <div class="content-section active" id="section-ai">
+    <div class="section-header fade-in">
+      <div class="section-title">ARTIFICIAL INTELLIGENCE</div>
+      <div class="section-subtitle">Technology &amp; Your Money</div>
+    </div>
+    <hr style="margin-top:12px;">
+    <div class="featured-article fade-in" id="ai-featured"></div>
+    <div class="article-grid" id="ai-grid"></div>
+  </div>
+
+  <!-- HOPECORE -->
+  <div class="content-section" id="section-hope">
+    <div class="section-header fade-in">
+      <div class="section-title">HOPECORE</div>
+      <div class="section-subtitle">Cures, Courage &amp; Community</div>
+    </div>
+    <hr style="margin-top:12px;">
+    <div class="featured-article fade-in" id="hope-featured"></div>
+    <div class="article-grid" id="hope-grid"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div id="site-footer">
+    <hr>
+    <div class="footer-links">
+      <a href="https://x.com/mr_rongcrypto?s=21" target="_blank" rel="noopener">X Account</a>
+      <a href="https://youtube.com/@cr8f8?si=--Sdk09XpmNjckEt" target="_blank" rel="noopener">YouTube Channel</a>
+      <a href="https://www.google.com/search?q=DndEY5nfF9pF3tt7maE41m7KsXL7QsWDZcxe7R62pump" target="_blank" rel="noopener">Memecoin for CR8F8</a>
+    </div>
+    <div class="footer-quote">
+      "Fate was, is, and will always be, in our hands. It's up to us as individuals and as a human family to decide on what this story really says."
+    </div>
+    <div class="footer-sign">From before now and into eternity, with love,</div>
+    <div class="footer-glitch">— Glitch</div>
+    <hr>
+    <div class="footer-copy">&copy; 2026 CR8F8 NEWS COMPANY. ALL RIGHTS RESERVED.</div>
+  </div>
+
+</div>
+
+<script>
+/* ================================================================
+   ╔═══════════════════════════════════════════════════════════════╗
+   ║  EASILY EDITABLE CONTENT — CHANGE THESE TO UPDATE THE SITE  ║
+   ╚═══════════════════════════════════════════════════════════════╝
+   ================================================================ */
+
+// ── SET TO true WHEN YOU HAVE REAL BREAKING NEWS ────────────────
+// When false: shows animated "under construction" love story scene
+// When true: shows scrolling breaking news text
+const SHOW_REAL_BREAKING_NEWS = false;
+
+// ── BREAKING NEWS TEXT (one for each section) ───────────────────
+const BREAKING_NEWS_AI = "AI breakthroughs reshaping global markets • New language model passes expert-level medical exams • Tech giants invest $200B in AI infrastructure • Autonomous vehicles approved in 12 new states";
+
+const BREAKING_NEWS_HOPE = "Community raises $2M for displaced families overnight • Teen inventor creates water purifier from recycled materials • Hospital discharges its last childhood cancer patient this year • 94-year-old veteran reunited with wartime best friend";
+
+// ── MUSIC PLAYLIST ──────────────────────────────────────────────
+let PLAYLIST = [
+  { artist: "Artist Name 1", title: "Song Title Goes Here" },
+  { artist: "Artist Name 2", title: "Another Song Title" },
+  { artist: "Artist Name 3", title: "Third Track Title" },
+  { artist: "Artist Name 4", title: "Fourth Song Here" },
+  { artist: "Artist Name 5", title: "Fifth Track Title" },
+  { artist: "Artist Name 6", title: "Sixth Song Title" }
+];
+
+// ── AI NEWS ARTICLES ────────────────────────────────────────────
+const AI_FEATURED = {
+  headline: "[HEADLINE GOES HERE — AI FEATURED STORY]",
+  subtitle: "[Subtitle describing the featured AI story goes here]",
+  author: "[AUTHOR NAME]", date: "[DATE]", credit: "[Photo Credit]",
+  imageClass: "ai-img",
+  excerpt: `<p>[FIRST PARAGRAPH OF FEATURED AI ARTICLE GOES HERE. Write 2-3 sentences introducing the story.]</p>
+<p>[SECOND PARAGRAPH CONTINUES THE STORY. Add supporting details, quotes, or context.]</p>`,
+  continued: "Continued on Page A1..."
+};
+
+const AI_GRID = [
+  {
+    headline: "[HEADLINE — AI GRID ARTICLE 1]",
+    subtitle: "[Subtitle for AI grid article 1]",
+    author: "[AUTHOR NAME]", date: "[DATE]",
+    excerpt: `<p>[ARTICLE EXCERPT GOES HERE. Write 2-3 sentences summarizing this AI news story.]</p>`,
+    continued: "Continued on Page A3..."
+  },
+  {
+    headline: "[HEADLINE — AI GRID ARTICLE 2]",
+    subtitle: "[Subtitle for AI grid article 2]",
+    author: "[AUTHOR NAME]", date: "[DATE]",
+    excerpt: `<p>[ARTICLE EXCERPT GOES HERE. Write 2-3 sentences summarizing this AI news story.]</p>`,
+    continued: "Continued on Page A5..."
+  }
+];
+
+// ── HOPECORE ARTICLES ───────────────────────────────────────────
+const HOPE_FEATURED = {
+  headline: "[HEADLINE GOES HERE — HOPECORE FEATURED STORY]",
+  subtitle: "[Subtitle describing the featured Hopecore story goes here]",
+  author: "[AUTHOR NAME]", date: "[DATE]", credit: "[Photo Credit]",
+  imageClass: "hope-img",
+  excerpt: `<p>[FIRST PARAGRAPH OF FEATURED HOPECORE ARTICLE GOES HERE.]</p>
+<p>[SECOND PARAGRAPH CONTINUES THE STORY.]</p>`,
+  continued: "Continued on Page H1..."
+};
+
+const HOPE_GRID = [
+  {
+    headline: "[HEADLINE — HOPECORE GRID ARTICLE 1]",
+    subtitle: "[Subtitle for Hopecore grid article 1]",
+    author: "[AUTHOR NAME]", date: "[DATE]",
+    excerpt: `<p>[ARTICLE EXCERPT GOES HERE.]</p>`,
+    continued: "Continued on Page H7..."
+  },
+  {
+    headline: "[HEADLINE — HOPECORE GRID ARTICLE 2]",
+    subtitle: "[Subtitle for Hopecore grid article 2]",
+    author: "[AUTHOR NAME]", date: "[DATE]",
+    excerpt: `<p>[ARTICLE EXCERPT GOES HERE.]</p>`,
+    continued: "Continued on Page H10..."
+  }
+];
+
+/* ================================================================
+   END OF EDITABLE CONTENT
+   ================================================================ */
+
+let activeSection = 'ai';
+
+// Date
+const now = new Date();
+document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', {
+  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+});
+
+// Breaking news mode
+function initBreakingNews() {
+  if (SHOW_REAL_BREAKING_NEWS) {
+    document.getElementById('breaking-text').classList.remove('hidden');
+    document.getElementById('breaking-scene').classList.add('hidden');
+    setBreakingNews('ai');
+  } else {
+    document.getElementById('breaking-text').classList.add('hidden');
+    document.getElementById('breaking-scene').classList.remove('hidden');
+    buildCautionTape();
+  }
+}
+
+function setBreakingNews(section) {
+  const text = section === 'ai' ? BREAKING_NEWS_AI : BREAKING_NEWS_HOPE;
+  const doubled = text + '     •     ' + text + '     •     ';
+  const el = document.getElementById('breaking-text');
+  el.textContent = doubled;
+  el.style.animation = 'none';
+  el.offsetHeight;
+  el.style.animation = '';
+}
+
+function buildCautionTape() {
+  const tape = document.getElementById('caution-tape');
+  const segment = '🚧 ⚠️ UNDER CONSTRUCTION ⚠️ 🚧 ░░░▓▓▓░░░ 🔧 COMING SOON 🔧 ░░░▓▓▓░░░ ';
+  tape.textContent = segment + segment + segment + segment;
+}
+
+initBreakingNews();
+
+// Emoji reactions
+const emojiMap = {
+  '😢': 'cry', '😂': 'laugh', '😊': 'smile', '🍑': 'peach',
+  '🚀': 'rocket', '💰': 'money', '❤️': 'heart', '💔': 'broken', '🖤': 'black'
+};
+const emojiCounts = {};
+
+function reactEmoji(emoji, e) {
+  e.stopPropagation();
+  if (!emojiCounts[emoji]) emojiCounts[emoji] = 0;
+  emojiCounts[emoji]++;
+
+  const countEl = document.getElementById('count-' + emojiMap[emoji]);
+  if (countEl) {
+    countEl.textContent = emojiCounts[emoji];
+    countEl.classList.add('show');
+  }
+
+  const btn = e.currentTarget;
+  const rect = btn.getBoundingClientRect();
+  const floater = document.createElement('div');
+  floater.className = 'emoji-float';
+  floater.textContent = emoji;
+  floater.style.left = (rect.left + rect.width / 2 - 14) + 'px';
+  floater.style.top = (rect.top - 10) + 'px';
+  document.body.appendChild(floater);
+  setTimeout(() => floater.remove(), 1200);
+}
+
+// Taglines
+const TAGLINES = {
+  ai: '"News That\'s Fit For Compute"',
+  hope: '"News Fit For The Human Heart And Soul"'
+};
+
+// Toggle
+function switchSection(section) {
+  activeSection = section;
+  document.getElementById('btn-ai').classList.toggle('active', section === 'ai');
+  document.getElementById('btn-hope').classList.toggle('active', section === 'hope');
+  document.getElementById('section-ai').classList.toggle('active', section === 'ai');
+  document.getElementById('section-hope').classList.toggle('active', section === 'hope');
+  document.getElementById('tagline').textContent = TAGLINES[section];
+
+  if (SHOW_REAL_BREAKING_NEWS) setBreakingNews(section);
+
+  document.querySelector('.content-section.active').querySelectorAll('.fade-in').forEach(el => {
+    el.style.animation = 'none'; el.offsetHeight; el.style.animation = '';
+  });
+}
+
+// Articles
+function renderFeatured(data, id) {
+  document.getElementById(id).innerHTML = `
+    <div class="article-image ${data.imageClass}"></div>
+    <div class="article-credit">${data.credit}</div>
+    <h2 class="article-headline">${data.headline}</h2>
+    <div class="article-subtitle">${data.subtitle}</div>
+    <div class="article-byline">BY ${data.author} <span>&bull;</span> ${data.date}</div>
+    <div class="article-excerpt">${data.excerpt}</div>
+    <div class="article-continued">${data.continued}</div>
+    <hr style="margin-top:20px;">`;
+}
+
+function renderGrid(articles, id) {
+  document.getElementById(id).innerHTML = articles.map(a => `
+    <div class="grid-article">
+      <h3 class="article-headline">${a.headline}</h3>
+      <div class="article-subtitle">${a.subtitle}</div>
+      <div class="article-byline">BY ${a.author} <span>&bull;</span> ${a.date}</div>
+      <div class="article-excerpt">${a.excerpt}</div>
+      <div class="article-continued">${a.continued}</div>
+      <hr style="margin-top:16px;">
+    </div>`).join('');
+}
+
+renderFeatured(AI_FEATURED, 'ai-featured');
+renderGrid(AI_GRID, 'ai-grid');
+renderFeatured(HOPE_FEATURED, 'hope-featured');
+renderGrid(HOPE_GRID, 'hope-grid');
+
+// Music player
+let currentTrack = 0;
+
+function updateMusicTicker() {
+  const el = document.getElementById('music-ticker');
+  if (PLAYLIST.length === 0) {
+    el.textContent = '♪ Playlist coming soon — stay tuned...          ♪ Playlist coming soon — stay tuned...          ';
+    return;
+  }
+  const s = PLAYLIST[currentTrack % PLAYLIST.length];
+  el.textContent = `♪ Now Playing: ${s.artist} — ${s.title}          ♪ Now Playing: ${s.artist} — ${s.title}          `;
+}
+
+function renderPlaylist() {
+  const list = document.getElementById('playlist-list');
+  if (!PLAYLIST.length) {
+    list.innerHTML = '<div style="padding:20px 18px;color:#555;font-family:var(--serif-elegant);font-style:italic;">No tracks yet — check back soon!</div>';
+    return;
+  }
+  list.innerHTML = PLAYLIST.map((s, i) => `
+    <div class="pl-item ${i === currentTrack ? 'now-playing' : ''}">
+      <button class="pl-play" onclick="playSong(${i},event)" title="Play">&#9654;</button>
+      <div class="pl-info">
+        <div class="pl-artist">${s.artist}</div>
+        <div class="pl-song">${s.title}</div>
+      </div>
+      <button class="pl-remove" onclick="removeSong(${i},event)" title="Remove">&times;</button>
+    </div>`).join('');
+}
+
+function togglePlaylist() { document.getElementById('playlist-panel').classList.toggle('open'); }
+
+function playSong(i, e) {
+  e.stopPropagation(); currentTrack = i; updateMusicTicker(); renderPlaylist();
+}
+
+function removeSong(i, e) {
+  e.stopPropagation(); PLAYLIST.splice(i, 1);
+  if (currentTrack >= PLAYLIST.length) currentTrack = 0;
+  updateMusicTicker(); renderPlaylist();
+}
+
+document.addEventListener('click', function(e) {
+  const p = document.getElementById('playlist-panel');
+  const b = document.getElementById('music-bar');
+  if (!p.contains(e.target) && !b.contains(e.target)) p.classList.remove('open');
+});
+
+updateMusicTicker();
+renderPlaylist();
+document.getElementById('tagline').textContent = TAGLINES.ai;
+</script>
+
+</body>
+</html>
