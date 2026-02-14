@@ -47,13 +47,14 @@ hr { border: none; border-top: 1px solid var(--rule); margin: 0; }
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
   height: 36px; background: rgba(10,10,10,0.92);
   border-bottom: 1px solid #1a1a1a; cursor: pointer;
-  overflow: hidden; display: flex; align-items: center;
+  display: flex; align-items: center;
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
 
 #music-bar .ticker-wrap {
-  width: 100%; overflow: hidden; position: relative;
+  flex: 1; overflow: hidden; position: relative;
   height: 36px; display: flex; align-items: center;
+  min-width: 0;
 }
 
 #music-bar .ticker-text {
@@ -69,9 +70,8 @@ hr { border: none; border-top: 1px solid var(--rule); margin: 0; }
 }
 
 #music-bar .speaker-toggle {
-  position: absolute; right: 110px; top: 50%; transform: translateY(-50%);
-  background: none; border: none; cursor: pointer; padding: 4px;
-  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; background: none; border: none; cursor: pointer;
+  padding: 4px 8px; display: flex; align-items: center; justify-content: center;
   z-index: 10; transition: opacity 0.2s;
 }
 #music-bar .speaker-toggle:hover { opacity: 0.8; }
@@ -87,9 +87,10 @@ hr { border: none; border-top: 1px solid var(--rule); margin: 0; }
 }
 
 #music-bar .bar-icon {
-  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  flex-shrink: 0; padding-right: 14px;
   font-size: 11px; color: var(--text-dim); pointer-events: none;
   font-family: var(--serif-body); letter-spacing: 1px; text-transform: uppercase;
+  white-space: nowrap;
 }
 
 /* Playlist dropdown */
@@ -666,7 +667,6 @@ hr { border: none; border-top: 1px solid var(--rule); margin: 0; }
   body { padding-top: 32px; }
   #music-bar { height: 32px; }
   #music-bar .ticker-text { font-size: 12px; }
-  #music-bar .speaker-toggle { right: 90px; }
   #music-bar .speaker-toggle svg { width: 16px; height: 16px; }
   #playlist-panel { width: 100%; }
   .container { padding: 0 16px; }
@@ -692,7 +692,6 @@ hr { border: none; border-top: 1px solid var(--rule); margin: 0; }
   to { opacity: 1; transform: translateY(0); }
 }
 </style>
-<script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
@@ -1206,6 +1205,8 @@ updateMusicTicker();
 renderPlaylist();
 document.getElementById('tagline').textContent = TAGLINES.ai;
 </script>
+
+<script src="https://www.youtube.com/iframe_api"></script>
 
 </body>
 </html>
